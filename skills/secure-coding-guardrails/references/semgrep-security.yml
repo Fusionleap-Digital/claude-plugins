@@ -1,0 +1,142 @@
+rules:
+
+  # ── Hardcoded Secrets ────────────────────────────────────────────────────────
+
+  - id: hardcoded-api-key
+    patterns:
+      - pattern: const $VAR = "..."
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: (?i)(api_?key|secret|token|password|auth|credential|private_?key)
+    message: >
+      Possible hardcoded secret in `$VAR`. Move to environment variables and
+      access via `process.env.$VAR`.
+    severity: ERROR
+    languages: [typescript, javascript]
+    paths:
+      exclude: ["*.test.ts", "*.spec.ts", ".secrets.baseline"]
+
+  - id: hardcoded-mongodb-uri
+    pattern-either:
+      - pattern: '"mongodb$REST"'
+      - pattern: '`mongodb$REST`'
+    message: >
+      Hardcoded MongoDB URI detected. Use process.env.MONGODB_URI instead.
+    severity: ERROR
+    languages: [typescript, javascript]
+    metadata:
+      cwe: CWE-798
+
+  # ── NEXT_PUBLIC_ Secret Leak ─────────────────────────────────────────────────
+
+  - id: next-public-env-secret
+    pattern-regex: 'NEXT_PUBLIC_(?i)(secret|key|token|password|api_?key)[A-Z_]*\s*='
+    message: >
+      NEXT_PUBLIC_ variables are exposed to the browser. Never use NEXT_PUBLIC_
+      for secrets, API keys, or tokens.
+    severity: ERROR
+    languages: [generic]
+    paths:
+      include: [".env*", "next.config.*"]
+
+  # ── API Route Auth Checks ────────────────────────────────────────────────────
+
+  - id: api-route-missing-auth-get
+    patterns:
+      - pattern: |
+          export async function GET(req: NextRequest) { ... return NextResponse.json(...); }
+      - pattern-not: |
+          export async function GET(req: NextRequest) { ... isAuthenticated(...) ... }
+      - pattern-not: |
+          export async function GET(req: NextRequest) { ... getAuthToken(...) ... }
+    message: >
+      GET handler does not check authentication. Call isAuthenticated() or
+      getAuthToken() before returning data from protected routes.
+    severity: WARNING
+    languages: [typescript]
+    paths:
+      include: ["app/api/"]
+      exclude: ["app/api/auth/", "app/api/health/", "app/api/contact/"]
+
+  - id: api-route-missing-auth-post
+    patterns:
+      - pattern: |
+          export async function POST(req: NextRequest) { ... return NextResponse.json(...); }
+      - pattern-not: |
+          export async function POST(req: NextRequest) { ... isAuthenticated(...) ... }
+      - pattern-not: |
+          export async function POST(req: NextRequest) { ... getAuthToken(...) ... }
+    message: >
+      POST handler does not check authentication. Call isAuthenticated() or
+      getAuthToken() before mutating data.
+    severity: WARNING
+    languages: [typescript]
+    paths:
+      include: ["app/api/"]
+      exclude: ["app/api/auth/", "app/api/health/"]
+
+  # ── Dangerous Functions ──────────────────────────────────────────────────────
+
+  - id: no-eval
+    patterns:
+      - pattern: eval(...)
+    message: >
+      eval() allows arbitrary code execution. Refactor to avoid dynamic code evaluation.
+    severity: ERROR
+    languages: [typescript, javascript]
+    metadata:
+      cwe: CWE-95
+
+  - id: no-new-function
+    patterns:
+      - pattern: new Function(...)
+    message: >
+      new Function(...) executes strings as code — as dangerous as eval().
+    severity: ERROR
+    languages: [typescript, javascript]
+
+  - id: no-dangerouslysetinnerhtml-variable
+    patterns:
+      - pattern: dangerouslySetInnerHTML={{ __html: $VAR }}
+      - pattern-not: dangerouslySetInnerHTML={{ __html: "..." }}
+    message: >
+      dangerouslySetInnerHTML with a variable risks XSS. Sanitize with
+      DOMPurify before rendering.
+    severity: ERROR
+    languages: [typescript, javascript]
+    metadata:
+      cwe: CWE-79
+
+  # ── MongoDB / NoSQL Injection ────────────────────────────────────────────────
+
+  - id: mongoose-query-user-input
+    patterns:
+      - pattern: $MODEL.find({ $FIELD: req.$ANYTHING })
+    message: >
+      Passing raw request data into Mongoose queries may allow NoSQL injection.
+      Validate and sanitize req.$ANYTHING first.
+    severity: WARNING
+    languages: [typescript, javascript]
+    metadata:
+      cwe: CWE-943
+
+  # ── Sensitive Data in Responses ──────────────────────────────────────────────
+
+  - id: password-in-response
+    patterns:
+      - pattern: NextResponse.json({ ..., password: $VAL, ... })
+    message: >
+      Password field in JSON response. Never return password hashes to the client.
+    severity: ERROR
+    languages: [typescript, javascript]
+    metadata:
+      cwe: CWE-312
+
+  - id: token-in-response-body
+    patterns:
+      - pattern: NextResponse.json({ ..., token: $VAL, ... })
+    message: >
+      Session token in response body. Use HttpOnly cookies instead of returning
+      tokens in JSON responses.
+    severity: WARNING
+    languages: [typescript, javascript]
