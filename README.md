@@ -36,7 +36,7 @@ Four parts:
 ### Install
 
 ```
-/plugin marketplace add <this-repo-url>
+/plugin marketplace add Fusionleap-Digital/claude-plugins
 /plugin install site-hardening@fusionleap
 ```
 
