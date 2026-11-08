@@ -13,7 +13,7 @@
  *   - JSDoc documentation  →  scripts/gen-from-spec.ts --docs
  *   - Code boilerplate     →  scripts/gen-from-spec.ts --scaffold
  *
- * Phase 2: PMs write PRDs/JIRA tickets → Claude drafts this spec for engineer review.
+ * Paste a PRD or ticket into Claude and it drafts this spec for engineer review.
  */
 
 // ── Core Types ────────────────────────────────────────────────────────────────
