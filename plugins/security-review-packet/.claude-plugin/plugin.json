@@ -1,0 +1,9 @@
+{
+  "name": "security-review-packet",
+  "version": "0.1.0",
+  "description": "Draft the packet security and compliance need before they sign off on an AI system: inventory of models, vendors, data stores, routes, agent tools, MCP servers, IaC and dependencies from the repo, then a cited system overview, data flow, data classification, threat review and open questions, with an optional SOC 2 / NIST AI RMF / ISO 42001 / OWASP LLM coverage map.",
+  "author": { "name": "FusionLeap Digital" },
+  "homepage": "https://fusionleap.io",
+  "license": "MIT",
+  "keywords": ["security", "compliance", "ai", "llm", "rag", "agents", "soc2", "owasp-llm", "nist-ai-rmf", "iso-42001"]
+}

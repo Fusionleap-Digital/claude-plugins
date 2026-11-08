@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "claims-db": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgres://readonly@localhost:5432/claims"],
+      "env": { "PGPASSWORD": "${CLAIMS_DB_READONLY_PASSWORD}" }
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": { "Authorization": "Bearer ${GITHUB_PAT}" }
+    }
+  }
+}
