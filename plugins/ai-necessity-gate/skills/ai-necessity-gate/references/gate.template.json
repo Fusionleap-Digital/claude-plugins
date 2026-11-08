@@ -1,0 +1,65 @@
+{
+  "use_case": {
+    "name": "",
+    "organization": "",
+    "date": "",
+    "prepared_by": "",
+    "prepared_for": "",
+    "summary": ""
+  },
+  "intake": {
+    "problem": "",
+    "who": "",
+    "today": "",
+    "volume": "",
+    "cost": "",
+    "wrong_answer": "",
+    "data": "",
+    "value": "",
+    "sign_off": ""
+  },
+  "simplicity": {
+    "input": { "score": null, "evidence": "" },
+    "rules": { "score": null, "evidence": "" },
+    "output": { "score": null, "evidence": "" },
+    "alternative": { "score": null, "evidence": "" }
+  },
+  "alternative": {
+    "best": "rules | search | report | form | process | integration | none",
+    "description": ""
+  },
+  "clarity": {
+    "value": { "score": null, "evidence": "" },
+    "volume": { "score": null, "evidence": "" },
+    "owner": { "score": null, "evidence": "" },
+    "wrong_answer": { "score": null, "evidence": "" }
+  },
+  "data": {
+    "profiled": false,
+    "availability": { "score": null, "evidence": "" },
+    "quality": { "score": null, "evidence": "" },
+    "access": { "score": null, "evidence": "" },
+    "sensitivity": { "score": null, "evidence": "" }
+  },
+  "risk": {
+    "flags": {
+      "decisions_about_people": null,
+      "regulated_data": null,
+      "unreviewed_external_output": null,
+      "personal_data": null,
+      "money_movement": null
+    },
+    "regulations": [],
+    "sign_off": [{ "who": "", "needs": "" }]
+  },
+  "reasons": [],
+  "top_risks": [
+    { "risk": "", "mitigation": "" },
+    { "risk": "", "mitigation": "" },
+    { "risk": "", "mitigation": "" }
+  ],
+  "first_build": { "scope": "", "left_out": "" },
+  "measure": { "metric": "", "baseline": "", "target": "", "check_by": "" },
+  "data_fixes": [],
+  "unblock": []
+}

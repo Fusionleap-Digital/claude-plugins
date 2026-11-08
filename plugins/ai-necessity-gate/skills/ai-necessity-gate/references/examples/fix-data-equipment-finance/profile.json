@@ -1,0 +1,347 @@
+{
+  "as_of": "2026-11-08",
+  "sources": [
+    {
+      "file": "contracts_sample.csv",
+      "kind": "data",
+      "format": "csv",
+      "delimiter": ",",
+      "rows": 1200,
+      "column_count": 19,
+      "duplicate_rows": 0,
+      "candidate_keys": [],
+      "sensitive_columns": [
+        {
+          "name": "owner_first_name",
+          "categories": [
+            "PII"
+          ]
+        },
+        {
+          "name": "owner_last_name",
+          "categories": [
+            "PII"
+          ]
+        },
+        {
+          "name": "tax_id",
+          "categories": [
+            "financial"
+          ]
+        },
+        {
+          "name": "contact_email",
+          "categories": [
+            "PII"
+          ]
+        },
+        {
+          "name": "contact_phone",
+          "categories": [
+            "PII"
+          ]
+        }
+      ],
+      "columns": [
+        {
+          "name": "contract_id",
+          "type": "string",
+          "nulls": 0,
+          "null_rate": 0,
+          "distinct": 1196,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 4,
+          "pii": [],
+          "id_like": true
+        },
+        {
+          "name": "servicing_customer_id",
+          "type": "string",
+          "nulls": 0,
+          "null_rate": 0,
+          "distinct": 516,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 684,
+          "pii": [],
+          "id_like": true
+        },
+        {
+          "name": "origination_customer_id",
+          "type": "string",
+          "nulls": 214,
+          "null_rate": 0.1783,
+          "distinct": 458,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 528,
+          "pii": [],
+          "id_like": true
+        },
+        {
+          "name": "legal_name",
+          "type": "string",
+          "nulls": 0,
+          "null_rate": 0,
+          "distinct": 516,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 684,
+          "pii": [],
+          "id_like": false
+        },
+        {
+          "name": "owner_first_name",
+          "type": "string",
+          "nulls": 772,
+          "null_rate": 0.6433,
+          "distinct": 4,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 424,
+          "pii": [
+            {
+              "category": "PII",
+              "label": "person name",
+              "reason": "name"
+            }
+          ],
+          "id_like": false
+        },
+        {
+          "name": "owner_last_name",
+          "type": "string",
+          "nulls": 772,
+          "null_rate": 0.6433,
+          "distinct": 3,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 425,
+          "pii": [
+            {
+              "category": "PII",
+              "label": "person name",
+              "reason": "name"
+            }
+          ],
+          "id_like": false
+        },
+        {
+          "name": "tax_id",
+          "type": "string",
+          "nulls": 772,
+          "null_rate": 0.6433,
+          "distinct": 272,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 156,
+          "pii": [
+            {
+              "category": "financial",
+              "label": "tax id",
+              "reason": "name"
+            }
+          ],
+          "id_like": true
+        },
+        {
+          "name": "contact_email",
+          "type": "string",
+          "nulls": 0,
+          "null_rate": 0,
+          "distinct": 516,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 684,
+          "pii": [
+            {
+              "category": "PII",
+              "label": "email",
+              "reason": "name"
+            },
+            {
+              "category": "PII",
+              "label": "email",
+              "reason": "pattern",
+              "matches": 1200,
+              "match_rate": 1
+            }
+          ],
+          "id_like": false
+        },
+        {
+          "name": "contact_phone",
+          "type": "string",
+          "nulls": 0,
+          "null_rate": 0,
+          "distinct": 738,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 462,
+          "pii": [
+            {
+              "category": "PII",
+              "label": "phone",
+              "reason": "name"
+            },
+            {
+              "category": "PII",
+              "label": "phone",
+              "reason": "pattern",
+              "matches": 1200,
+              "match_rate": 1
+            }
+          ],
+          "id_like": false
+        },
+        {
+          "name": "industry_code",
+          "type": "integer",
+          "nulls": 274,
+          "null_rate": 0.2283,
+          "distinct": 6,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 920,
+          "pii": [],
+          "id_like": false
+        },
+        {
+          "name": "equipment_type",
+          "type": "string",
+          "nulls": 0,
+          "null_rate": 0,
+          "distinct": 6,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 1194,
+          "pii": [],
+          "id_like": false
+        },
+        {
+          "name": "original_amount",
+          "type": "integer",
+          "nulls": 0,
+          "null_rate": 0,
+          "distinct": 512,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 688,
+          "pii": [],
+          "id_like": false
+        },
+        {
+          "name": "term_months",
+          "type": "integer",
+          "nulls": 0,
+          "null_rate": 0,
+          "distinct": 4,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 1196,
+          "pii": [],
+          "id_like": false
+        },
+        {
+          "name": "funded_date",
+          "type": "date",
+          "nulls": 0,
+          "null_rate": 0,
+          "distinct": 685,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 515,
+          "pii": [],
+          "id_like": false,
+          "freshness": {
+            "newest_age_days": 8,
+            "span_days": 2399
+          }
+        },
+        {
+          "name": "last_payment_date",
+          "type": "date",
+          "nulls": 0,
+          "null_rate": 0,
+          "distinct": 80,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 1120,
+          "pii": [],
+          "id_like": false,
+          "freshness": {
+            "newest_age_days": 1,
+            "span_days": 131
+          }
+        },
+        {
+          "name": "days_past_due",
+          "type": "integer",
+          "nulls": 0,
+          "null_rate": 0,
+          "distinct": 7,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 1193,
+          "pii": [],
+          "id_like": false
+        },
+        {
+          "name": "financials_as_of",
+          "type": "date",
+          "nulls": 375,
+          "null_rate": 0.3125,
+          "distinct": 378,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 447,
+          "pii": [],
+          "id_like": false,
+          "freshness": {
+            "newest_age_days": 300,
+            "span_days": 693
+          }
+        },
+        {
+          "name": "annual_revenue",
+          "type": "integer",
+          "nulls": 372,
+          "null_rate": 0.31,
+          "distinct": 289,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 539,
+          "pii": [],
+          "id_like": false
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "nulls": 0,
+          "null_rate": 0,
+          "distinct": 7,
+          "distinct_capped": false,
+          "candidate_key": false,
+          "duplicates": 1193,
+          "pii": [],
+          "id_like": false
+        }
+      ],
+      "issues": [
+        "No single column is unique and complete, so there is no obvious primary key.",
+        "`contract_id` looks like an ID but has 4 repeated value(s).",
+        "`servicing_customer_id` looks like an ID but has 684 repeated value(s).",
+        "`origination_customer_id` looks like an ID but has 528 repeated value(s) and 214 empty.",
+        "`owner_first_name` is 64.3% empty.",
+        "`owner_last_name` is 64.3% empty.",
+        "`tax_id` is 64.3% empty.",
+        "`tax_id` looks like an ID but has 156 repeated value(s) and 772 empty.",
+        "`industry_code` is 22.8% empty.",
+        "`financials_as_of` is 31.3% empty.",
+        "`financials_as_of`: newest value is 300 days old.",
+        "`annual_revenue` is 31.0% empty."
+      ]
+    }
+  ]
+}

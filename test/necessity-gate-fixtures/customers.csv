@@ -1,0 +1,8 @@
+customer_id,account_id,Email,contact_phone,notes,date_of_birth,updated_at,balance,region_code,status
+C001,A-100,zara.quill@example.test,(555) 201-3344,"Prefers email, ""no calls""",1984-03-02,2026-11-01,1200.50,007,active
+C002,A-101,ivo.marsh@example.test,555-201-7788,called about invoice,1979-11-23,2026-11-03,0,012,active
+C003,A-101,,555.201.9911,"SSN on file 123-45-6789, verify",1990-07-14,2026-10-28,88.10,007,closed
+C004,A-102,pema.lund@example.test,,"multi-line
+note here",,2026-11-05,NA,012,active
+C005,A-103,teo.vance@example.test,555-201-4455,card 4111 1111 1111 1111 given by phone,2001-01-30,2026-11-06,15,019,active
+C005,A-103,teo.vance@example.test,555-201-4455,card 4111 1111 1111 1111 given by phone,2001-01-30,2026-11-06,15,019,active

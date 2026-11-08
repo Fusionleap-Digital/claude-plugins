@@ -1,0 +1,195 @@
+{
+  "use_case": {
+    "name": "Early warning for delinquent accounts",
+    "organization": "Harbor Point Equipment Finance (fictional)",
+    "date": "2026-11-08",
+    "prepared_by": "Renee Castillo, CTO",
+    "prepared_for": "Helen Mbeki, CFO",
+    "summary": "A weekly list of contracts likely to go 30+ days past due in the next 60 days, so collections can call early and offer a payment plan. Outreach priority only: it doesn't change credit terms, limits or pricing."
+  },
+  "intake": {
+    "problem": "Trouble shows up only at the first missed payment, when the equipment may already be idle, moved or sold.",
+    "who": "Collections team under Tom Brandt; 11,000 active contracts.",
+    "today": "Collections works accounts by days past due; a senior analyst keeps a gut-feel watchlist from industry news and utilization reports.",
+    "volume": "11,000 active contracts; 6.2% went 30+ days past due last year.",
+    "cost": "$9.8M net charge-offs last year (0.70% of the portfolio). Early contact cuts losses on an account by about a third (collections estimate).",
+    "wrong_answer": "A miss is what happens today; a false alarm is a polite call to a good customer. Collectors decide every action.",
+    "data": "Seven years of payment history in servicing (lands nightly in Snowflake); origination data in a separate system, not in Snowflake; telematics for about 40% of the fleet. Customer IDs don't always match after a 2021 re-key; industry codes often blank; financials updated yearly at best. Sole-proprietor names, tax IDs, emails and phones.",
+    "value": "Net charge-off rate 0.70% today, target 0.55%.",
+    "sign_off": "Tom Brandt (owner), Helen Mbeki (sponsor), security, compliance, warehouse-line banks."
+  },
+  "simplicity": {
+    "input": {
+      "score": 0,
+      "evidence": "Structured data: payment history, days past due, amounts, codes, engine hours."
+    },
+    "rules": {
+      "score": 2,
+      "evidence": "Nobody can write down rules for spotting trouble before a miss: days-past-due rules fire only after one, and the analyst's watchlist is unwritten judgment."
+    },
+    "output": {
+      "score": 2,
+      "evidence": "A probability of 30+ days past due within 60 days, per contract."
+    },
+    "alternative": {
+      "score": 1,
+      "evidence": "Rules on payment-date drift, partial payments and utilization drops would catch some early cases, perhaps half."
+    }
+  },
+  "alternative": {
+    "best": "rules",
+    "description": "A rule-based watchlist: flag contracts whose payments arrive later each month, that make partial payments, or whose engine hours drop sharply. Build it first as the baseline; the model ships only if it clearly beats these rules in the back-test."
+  },
+  "clarity": {
+    "value": {
+      "score": 2,
+      "evidence": "Net charge-off rate, 0.70% last year ($9.8M), target 0.55%."
+    },
+    "volume": {
+      "score": 2,
+      "evidence": "11,000 active contracts, a 6.2% 30+ day rate and $9.8M in net charge-offs, all from the servicing system."
+    },
+    "owner": {
+      "score": 2,
+      "evidence": "Tom Brandt owns collections and the outcome; the CFO sponsors it."
+    },
+    "wrong_answer": {
+      "score": 2,
+      "evidence": "A false alarm costs one courtesy call; collectors decide every action; the list never changes terms."
+    }
+  },
+  "data": {
+    "profiled": true,
+    "availability": {
+      "score": 1,
+      "evidence": "Seven years of payment history exist, but origination data isn't in the warehouse, telematics covers about 40% of the fleet, and the two systems don't share a reliable customer key."
+    },
+    "quality": {
+      "score": 1,
+      "evidence": "Profile of the 1,200-row sample: origination_customer_id 17.8% empty, industry_code 22.8% empty, financials_as_of 31.3% empty and newest 300 days old, contract_id has 4 repeated values. Repeats in servicing_customer_id are expected (several contracts per customer)."
+    },
+    "access": {
+      "score": 1,
+      "evidence": "Owners are named (Tom Brandt for servicing, Ravi Shah for origination). Servicing lands in Snowflake nightly; origination has no read path yet."
+    },
+    "sensitivity": {
+      "score": 1,
+      "evidence": "The profile flags owner names, tax_id, contact_email and contact_phone. The team knows what's there but has no masking plan yet."
+    }
+  },
+  "risk": {
+    "flags": {
+      "decisions_about_people": false,
+      "regulated_data": true,
+      "unreviewed_external_output": false,
+      "personal_data": true,
+      "money_movement": false
+    },
+    "regulations": [
+      "ECOA and Regulation B (fair lending, including business credit)",
+      "FCRA, if credit bureau data is used as a feature",
+      "GLBA safeguards for customer financial data",
+      "State privacy laws for sole proprietors"
+    ],
+    "sign_off": [
+      {
+        "who": "Security",
+        "needs": "Data flow from servicing and origination into Snowflake, masked views for the model, where training and scoring run, and who can see the weekly list."
+      },
+      {
+        "who": "Compliance",
+        "needs": "The feature list with a review for proxies of protected classes, proof that the list only orders outreach, and that every flagged customer is offered the same plan options."
+      },
+      {
+        "who": "Warehouse-line banks",
+        "needs": "Model documentation: data sources, the back-test against the rule baseline, validation, monitoring and drift checks."
+      },
+      {
+        "who": "Tom Brandt and Ravi Shah, data owners",
+        "needs": "Which tables and fields, read-only access, and sign-off on the customer ID crosswalk."
+      },
+      {
+        "who": "Helen Mbeki, CFO",
+        "needs": "The charge-off metric, baseline, target and check date."
+      }
+    ]
+  },
+  "reasons": [
+    "Predicting which current accounts will go late is a forecast from many weak signals, and the existing days-past-due rules only fire after the miss. It passes the Simplicity Test (5 of 8) but not by much, so a rule-based watchlist is the baseline to beat.",
+    "The value is clear and large: net charge-offs were $9.8M last year, and there is a named owner, a sponsor, and a cheap cost for false alarms.",
+    "The data exists and has owners, but it isn't ready (4 of 8): origination isn't in the warehouse, customer IDs don't match after the 2021 re-key, and key fields are 18% to 31% empty in the sample.",
+    "These are weeks of data work, not a research problem. Fix them first, then build; building on the broken join would train the model on mismatched customers."
+  ],
+  "top_risks": [
+    {
+      "risk": "The model doesn't beat a simple drift-and-partial-payment rule.",
+      "mitigation": "Back-test both on the same months; ship the rules if the model doesn't clearly win."
+    },
+    {
+      "risk": "Features such as state or industry act as proxies for protected classes, creating fair-lending exposure even in collections.",
+      "mitigation": "Compliance reviews the feature list before training; direct identifiers stay out; every flagged customer gets the same plan options; results are documented for the banks."
+    },
+    {
+      "risk": "Crosswalk mistakes attach the wrong origination data to a customer.",
+      "mitigation": "Build the crosswalk with a match confidence, have both data owners review it, and leave unmatched contracts out of training."
+    }
+  ],
+  "first_build": {
+    "scope": "After the data fixes: a model trained on servicing history plus crosswalked origination data, back-tested on the first half of 2026 against the rule baseline. If it wins, a weekly top-200 list for two collectors for eight weeks.",
+    "left_out": "Telematics (40% coverage, next version), annual financial statements as features, any automatic action, and any change to terms, limits or pricing."
+  },
+  "measure": {
+    "metric": "Net charge-off rate",
+    "baseline": "0.70%",
+    "target": "0.55% annualized, with the roll rate to 30+ days past due among flagged accounts reviewed monthly from the first list",
+    "check_by": "2027-12-31"
+  },
+  "data_fixes": [
+    {
+      "gap": "Origination data isn't in Snowflake.",
+      "owner": "IT data team with Ravi Shah",
+      "done_when": "Origination tables load nightly with a freshness check."
+    },
+    {
+      "gap": "Customer IDs don't match between origination and servicing (17.8% blank in the sample, plus re-keyed IDs).",
+      "owner": "Ravi Shah and Tom Brandt",
+      "done_when": "A reviewed crosswalk matches at least 98% of active contracts."
+    },
+    {
+      "gap": "contract_id repeats in the extract (4 in 1,200 rows).",
+      "owner": "Servicing operations",
+      "done_when": "contract_id is unique in the extract."
+    },
+    {
+      "gap": "industry_code is 22.8% blank.",
+      "owner": "Credit team",
+      "done_when": "Under 5% blank on active contracts, or blanks are an explicit \"unknown\" the model can use."
+    },
+    {
+      "gap": "Tax IDs and owner contact details sit next to the features.",
+      "owner": "IT security and the data team",
+      "done_when": "The model reads a masked view with no direct identifiers."
+    }
+  ],
+  "unblock": [],
+  "result": {
+    "rubric_version": "1.0.0",
+    "verdict": "go_after_fixing_data",
+    "verdict_label": "Go after fixing data",
+    "rule": 4,
+    "scores": {
+      "simplicity": 5,
+      "clarity": 8,
+      "data": 4
+    },
+    "max_per_test": 8,
+    "tests": {
+      "simplicity": "needs_ai",
+      "clarity": "pass",
+      "data": "fixable"
+    },
+    "data_verified": true,
+    "risk_level": "high",
+    "human_review": "A person reviews every output in the first build."
+  }
+}

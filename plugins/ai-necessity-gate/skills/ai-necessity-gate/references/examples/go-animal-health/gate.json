@@ -1,0 +1,164 @@
+{
+  "use_case": {
+    "name": "Read lab requisition forms",
+    "organization": "Ridgeline Veterinary Diagnostics (fictional)",
+    "date": "2026-11-08",
+    "prepared_by": "Dana Okafor, VP Technology",
+    "prepared_for": "Priya Natarajan, CEO",
+    "summary": "Extract the fields from faxed and scanned requisition forms, pre-fill the LIMS record, and have accessioning staff confirm it instead of typing it. About 2,300 forms a day from 1,400 clinics, each with its own layout."
+  },
+  "intake": {
+    "problem": "Samples wait in a queue until their paper requisition form is keyed by hand, which delays results and causes keying errors.",
+    "who": "Nine accessioning staff at three labs; clinics waiting for results.",
+    "today": "Staff key each faxed or scanned form into LIMS, about 4 minutes a form. 30% of orders come through a structured web portal instead.",
+    "volume": "About 2,300 forms a day, counted.",
+    "cost": "3.1% keying error rate (last quarter's audit); about 40 wrong-test re-runs a week at $85 each; results 6 to 8 hours late on busy mornings.",
+    "wrong_answer": "Wrong test runs or the result goes to the wrong clinic. Staff confirm every record; unsure fields are highlighted.",
+    "data": "1.9 million scanned forms over three years, each linked to the LIMS record keyed from it. LIMS read replica in Azure. Pet owners' names, addresses and phones; no human medical data.",
+    "value": "Median receipt-to-in-testing time: 3.4 hours today, target under 1 hour. Fewer re-runs.",
+    "sign_off": "Marcus Reyes (lab operations, owner), Priya Natarajan (CEO, sponsor), IT security lead, compliance manager."
+  },
+  "simplicity": {
+    "input": {
+      "score": 2,
+      "evidence": "Faxed and scanned paper, many handwritten, about 1,400 different clinic layouts."
+    },
+    "rules": {
+      "score": 2,
+      "evidence": "Where each field sits differs by clinic and by hand; staff read the form, they don't follow rules."
+    },
+    "output": {
+      "score": 2,
+      "evidence": "Values extracted from unstructured images: species, tests, clinic, vet, owner contact."
+    },
+    "alternative": {
+      "score": 2,
+      "evidence": "The web portal already takes 30% of orders and has been pushed for years; rural clinics and referral labs stay on paper, so it solves well under 40% of today's paper volume."
+    }
+  },
+  "alternative": {
+    "best": "form",
+    "description": "Grow the clinic web portal past its 30% share: onboarding calls for the top 100 paper clinics and a tick-box fax form for the 50 most-ordered tests. Keep doing this alongside the build; every portal order skips extraction entirely."
+  },
+  "clarity": {
+    "value": {
+      "score": 2,
+      "evidence": "Median receipt-to-in-testing time, 3.4 hours today; plus about $3,400 a week in wrong-test re-runs."
+    },
+    "volume": {
+      "score": 2,
+      "evidence": "2,300 forms a day from LIMS counts; 4 minutes a form; 40 re-runs a week at $85."
+    },
+    "owner": {
+      "score": 2,
+      "evidence": "Marcus Reyes owns the process and outcome; the CEO sponsors it with budget set aside."
+    },
+    "wrong_answer": {
+      "score": 2,
+      "evidence": "Cost is known (wrong test, wrong clinic). Staff confirm every record and low-confidence fields are highlighted."
+    }
+  },
+  "data": {
+    "profiled": false,
+    "availability": {
+      "score": 2,
+      "evidence": "1.9 million scans, each linked to the LIMS record keyed from it: three years of right answers to test against."
+    },
+    "quality": {
+      "score": 1,
+      "evidence": "Not profiled yet. The keyed records carry the known 3.1% error rate, so they are noisy as answers; audited forms can serve as a clean test set."
+    },
+    "access": {
+      "score": 2,
+      "evidence": "Marcus Reyes owns LIMS and the document store; read-only access to both already exists in Azure for reporting."
+    },
+    "sensitivity": {
+      "score": 2,
+      "evidence": "Owner contact data (PII) is already in a restricted LIMS table and masked in logs. Processing stays in their Azure tenant under terms that exclude training. Animal records are not PHI."
+    }
+  },
+  "risk": {
+    "flags": {
+      "decisions_about_people": false,
+      "regulated_data": false,
+      "unreviewed_external_output": false,
+      "personal_data": true,
+      "money_movement": false
+    },
+    "regulations": [
+      "State veterinary record confidentiality rules",
+      "State consumer privacy laws for pet owners' contact data"
+    ],
+    "sign_off": [
+      {
+        "who": "IT security lead",
+        "needs": "Data-flow diagram from scan to model to LIMS, Azure tenant and model deployment settings, who can see the confirm screen, and how prompts, images and outputs are logged and retained."
+      },
+      {
+        "who": "Compliance manager",
+        "needs": "Which owner contact fields are extracted, retention for images and model logs, and the confirm-every-record design."
+      },
+      {
+        "who": "Marcus Reyes, lab operations",
+        "needs": "Field-level accuracy on audited forms, the confirm screen, and the fallback to typing."
+      },
+      {
+        "who": "Priya Natarajan, CEO",
+        "needs": "The turnaround metric, baseline, target and check date."
+      }
+    ]
+  },
+  "reasons": [
+    "The inputs are scans of about 1,400 different, often handwritten forms, so no fixed template or rule set can read them; this is the kind of work a model is for.",
+    "The value is measurable today: median receipt-to-in-testing time is 3.4 hours against a 1-hour target, and wrong-test re-runs cost about $3,400 a week.",
+    "Three years of scans already linked to keyed records give a ready-made test set, and the data sits with a clear owner and an existing read path.",
+    "Owner contact data is already restricted and masked, and processing stays in Ridgeline's own Azure tenant, so the main sign-off questions have answers.",
+    "Data quality is the softest score: it hasn't been profiled, and the keyed records include the 3.1% error rate. Profile a sample in week one."
+  ],
+  "top_risks": [
+    {
+      "risk": "Accuracy on poor faxes and handwriting is too low for confirming to beat typing.",
+      "mitigation": "Measure field-level accuracy on 500 audited forms before building the screen; send low-confidence forms straight to manual keying."
+    },
+    {
+      "risk": "Staff wave through pre-filled fields, so errors that typing would catch get saved.",
+      "mitigation": "Require explicit confirmation of species and test codes, highlight unsure fields, and audit a weekly sample against today's 3.1%."
+    },
+    {
+      "risk": "The keyed records used as answers carry their own errors, so accuracy looks better or worse than it is.",
+      "mitigation": "Build the test set only from forms checked in last quarter's audit."
+    }
+  ],
+  "first_build": {
+    "scope": "One lab, the 50 clinics that send the most paper (about 40% of its paper volume), plus referral-lab forms. Extract clinic, vet, species, animal ID, tests and owner contact; pre-fill LIMS; staff confirm every record. Run it for eight weeks next to the current process.",
+    "left_out": "The other two labs, free-text clinical history, saving without confirmation, and any change to how samples are routed."
+  },
+  "measure": {
+    "metric": "Median time from sample receipt to in testing, at the pilot lab",
+    "baseline": "3.4 hours",
+    "target": "under 1 hour, with the keying error rate at or below 3.1%",
+    "check_by": "2027-03-31"
+  },
+  "data_fixes": [],
+  "unblock": [],
+  "result": {
+    "rubric_version": "1.0.0",
+    "verdict": "go",
+    "verdict_label": "Go",
+    "rule": 3,
+    "scores": {
+      "simplicity": 8,
+      "clarity": 8,
+      "data": 7
+    },
+    "max_per_test": 8,
+    "tests": {
+      "simplicity": "needs_ai",
+      "clarity": "pass",
+      "data": "pass"
+    },
+    "data_verified": false,
+    "risk_level": "medium",
+    "human_review": "A person reviews outputs below a confidence threshold, plus a sample of the rest."
+  }
+}
