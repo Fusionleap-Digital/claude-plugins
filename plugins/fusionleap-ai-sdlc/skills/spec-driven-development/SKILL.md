@@ -27,7 +27,7 @@ PM / Product Owner        Engineer              Claude AI
                       acceptance criteria)
 ```
 
-Phase 2 vision: Claude reads the PRD or JIRA ticket directly and drafts the spec for the engineer to review.
+If the user pastes a PRD, ticket or requirements text, draft the spec from it, then walk them through the gaps before saving it.
 
 ## Part 1 — Set up the spec infrastructure
 
@@ -54,7 +54,12 @@ This script reads a spec file and calls the Claude API to generate:
 - JSDoc documentation block
 - Code boilerplate scaffold
 
-### Step 1.4 — Add npm scripts to package.json
+### Step 1.4 — Add dependencies and npm scripts to package.json
+
+Install the generator's dependencies (skip any already present):
+```bash
+npm install --save-dev tsx dotenv @anthropic-ai/sdk
+```
 
 Add to `"scripts"`:
 ```json
@@ -74,14 +79,14 @@ specs/generated/
 
 Note: spec source files in `specs/*.spec.ts` should be committed. Only the generated output in `specs/generated/` is gitignored.
 
-### Step 1.6 — Check for ANTHROPIC_API_KEY
+### Step 1.6 — Check for Claude API credentials
 
-The generator calls the Claude API. Check if `ANTHROPIC_API_KEY` is set in `.env.local`. If not, remind the user:
+The generator calls the Claude API (model `claude-opus-5-5`; set `SPEC_GEN_MODEL` to use another). It finds credentials in `ANTHROPIC_API_KEY` (from `.env.local` or `.env`) or an `ant auth login` profile. If neither is set, tell the user to add one:
 ```
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-Get the key from console.anthropic.com.
+Never read or print the key's value. `--dry-run` works without credentials.
 
 ### Step 1.7 — Create a specs/README.md
 
@@ -103,6 +108,10 @@ When a user asks to write a spec for a feature, gather the following information
 - What is the feature called?
 - Which file or module does it live in? (e.g., `app/api/auth/session/route.ts` or `lib/bot-detection.ts`)
 - Is this an API endpoint, a library function, or a React component?
+
+**Stack** (read it from `package.json` and the code; confirm rather than ask):
+- Framework, language settings, database and test runner, as the `stack` list
+- How protected routes check auth in this project, as `authHelper`
 
 **Inputs:**
 - What parameters or request fields does it accept?
@@ -183,4 +192,4 @@ Remind the user:
 
 - Never include actual secret values in spec examples — use placeholder strings like `"sess_abc123"` or `"sk-ant-REPLACE_ME"`
 - If the user is on a team, encourage them to write specs for every new feature before writing code — this is the core discipline of spec-driven development
-- If the user mentions JIRA tickets or PRDs, offer to help translate them into a spec (this is the Phase 2 vision — AI drafts the spec from requirements for engineer review)
+- If the user mentions a JIRA ticket or PRD, ask them to paste its text and draft the spec from it. There is no JIRA integration; work only from what they paste.

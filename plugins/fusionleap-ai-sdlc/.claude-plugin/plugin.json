@@ -1,13 +1,13 @@
 {
   "name": "fusionleap-ai-sdlc",
-  "version": "1.0.1",
-  "description": "AI-Enhanced Engineering SDLC by FusionLeap Digital. Two production-ready pillars: Secure Coding Guardrails (Husky, Semgrep, detect-secrets) and Spec-Driven Development (machine-readable specs + Claude AI code generation) for Node.js / TypeScript projects.",
+  "version": "1.1.0",
+  "description": "Pre-commit security checks (Husky, lint-staged, tsc, detect-secrets, Semgrep) and spec-driven development (machine-readable specs, Claude-drafted tests, docs and scaffolds) for Node.js / TypeScript projects.",
   "author": {
     "name": "FusionLeap Digital",
     "url": "https://fusionleap.io"
   },
   "homepage": "https://fusionleap.io",
-  "repository": "https://github.com/mohigo/fusionleap-ai-sdlc",
+  "repository": "https://github.com/Fusionleap-Digital/claude-plugins",
   "category": "engineering",
   "keywords": [
     "sdlc",

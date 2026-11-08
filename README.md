@@ -1,5 +1,16 @@
 # FusionLeap plugins for Claude Code
 
+Free, MIT-licensed plugins from [FusionLeap Digital](https://fusionleap.io/tools). Add the marketplace once:
+
+```
+/plugin marketplace add Fusionleap-Digital/claude-plugins
+```
+
+| Plugin | What it does | Install |
+|---|---|---|
+| [site-hardening](#site-hardening) | Checks a website you own for exposed secret and config files, builds a verified Content-Security-Policy, repo and hosting checklists | `/plugin install site-hardening@fusionleap` |
+| [fusionleap-ai-sdlc](plugins/fusionleap-ai-sdlc/README.md) | Pre-commit security checks (lint, types, detect-secrets, Semgrep) and spec-driven development with Claude-drafted tests | `/plugin install fusionleap-ai-sdlc@fusionleap` |
+
 ## site-hardening
 
 Checks a website you own for the files and routes that scanners ask for, then

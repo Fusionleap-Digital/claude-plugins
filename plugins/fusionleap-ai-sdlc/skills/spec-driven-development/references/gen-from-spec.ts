@@ -13,11 +13,14 @@
  *   npx tsx scripts/gen-from-spec.ts --spec specs/auth-session.spec.ts --scaffold
  *   npx tsx scripts/gen-from-spec.ts --spec specs/auth-session.spec.ts --all
  *
- * Requires: ANTHROPIC_API_KEY in environment (add to .env.local or .env)
+ * Requires: Anthropic credentials (ANTHROPIC_API_KEY in .env.local or .env,
+ * or an `ant auth login` profile). Not needed for --dry-run.
+ * Model: claude-opus-5-5 by default; set SPEC_GEN_MODEL to override.
  */
 
 import * as fs from "fs";
 import * as path from "path";
+import Anthropic from "@anthropic-ai/sdk";
 import { config as loadDotenv } from "dotenv";
 
 // Load env files in Next.js priority order: .env.local overrides .env
@@ -39,6 +42,7 @@ const genTests = args.includes("--tests") || args.includes("--all");
 const genDocs = args.includes("--docs") || args.includes("--all");
 const genScaffold = args.includes("--scaffold") || args.includes("--all");
 const dryRun = args.includes("--dry-run");
+const MODEL = process.env.SPEC_GEN_MODEL || "claude-opus-5-5";
 
 if (!specPath) {
   console.error(`
@@ -84,16 +88,26 @@ async function loadSpec(filePath: string): Promise<FeatureSpec> {
 
 // ── Prompt builders ───────────────────────────────────────────────────────────
 
+function stackContext(spec: FeatureSpec): string {
+  const stack = spec.stack?.length ? spec.stack : ["TypeScript", "Vitest"];
+  return stack.map((s) => `- ${s}`).join("\n");
+}
+
+function authInstruction(spec: FeatureSpec): string {
+  return spec.authHelper
+    ? `using the project's auth check: ${spec.authHelper}`
+    : "using the project's existing auth check (leave a // TODO: naming it if unknown)";
+}
+
 function buildTestPrompt(spec: FeatureSpec): string {
   return `You are a senior TypeScript engineer. Apply the project conventions described in the spec.
 
-Generate a complete unit test file for the following feature spec. Use Vitest (describe/it/expect).
-Mock all external dependencies (MongoDB, fetch, Next.js request/response) using vi.mock().
+Generate a complete unit test file for the following feature spec, using the test runner in the stack below
+(Vitest describe/it/expect if none is listed). Mock all external dependencies (database, network, framework
+request/response objects).
 
 Tech stack context:
-- Next.js 14 App Router
-- TypeScript strict mode
-- MongoDB / Mongoose
+${stackContext(spec)}
 - No external test data — use in-memory mocks
 
 SPEC:
@@ -103,7 +117,7 @@ Requirements:
 1. One describe() block per function or API method
 2. One it() per acceptance criterion and per example
 3. Tag test names with [happy-path], [edge-case], [error-case], or [security] matching spec examples
-4. Mock getSession(), MongoDB models, and NextRequest/NextResponse as needed
+4. Mock the auth check, database access and request/response objects as needed
 5. Include a // TODO: comment for any example marked sensitive=true showing what NOT to assert
 6. Add a top-level comment: "Auto-generated from spec: ${spec.id} v${spec.version} — review before merging"
 
@@ -140,9 +154,12 @@ function buildScaffoldPrompt(spec: FeatureSpec): string {
 Generate a TypeScript code scaffold for the following feature spec.
 ${
   isApiRoute
-    ? `This is a Next.js 14 App Router API route at: ${spec.api!.path}`
+    ? `This is an API route (${spec.api!.method} ${spec.api!.path}) in: ${spec.module}`
     : `This is a TypeScript library function in: ${spec.module}`
 }
+
+Tech stack context:
+${stackContext(spec)}
 
 SPEC:
 ${JSON.stringify(spec, null, 2)}
@@ -151,10 +168,10 @@ Requirements:
 1. Implement all inputs as typed function parameters or NextRequest parsing
 2. Include all error cases with appropriate HTTP status codes (for routes) or thrown errors
 3. Add // TODO: implement comments where business logic needs to be filled in
-4. Include auth check if spec.api.auth === true (call isAuthenticated() from @/lib/auth)
+4. Include an auth check if spec.api.auth === true, ${authInstruction(spec)}
 5. Add JSDoc using the spec's description and acceptance criteria
 6. Follow project conventions: async/await, no callbacks, named exports for API routes
-7. Use NextRequest / NextResponse for API routes, pure TypeScript for library functions
+7. Use the request/response types of the stack above for API routes, pure TypeScript for library functions
 8. Mark sensitive fields with // SENSITIVE — do not log comment
 9. Add: "// Scaffolded from spec: ${spec.id} v${spec.version} — fill in TODOs"
 
@@ -164,16 +181,6 @@ Return only the TypeScript code. No explanation outside the file.`;
 // ── Claude API call ───────────────────────────────────────────────────────────
 
 async function callClaude(prompt: string, taskLabel: string): Promise<string> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    console.error(
-      "\nError: ANTHROPIC_API_KEY not set.\n" +
-        "Add it to .env.local or .env:\n" +
-        "  ANTHROPIC_API_KEY=sk-ant-...\n",
-    );
-    process.exit(1);
-  }
-
   if (dryRun) {
     console.log(`\n${"─".repeat(60)}`);
     console.log(`DRY RUN — Prompt for: ${taskLabel}`);
@@ -182,34 +189,51 @@ async function callClaude(prompt: string, taskLabel: string): Promise<string> {
     return `// DRY RUN — Claude API not called`;
   }
 
-  console.log(`  → Calling Claude API for ${taskLabel}...`);
+  console.log(`  → Calling Claude (${MODEL}) for ${taskLabel}...`);
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: "claude-opus-4-6",
-      max_tokens: 4096,
-      messages: [{ role: "user", content: prompt }],
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.text();
-    console.error(`Claude API error (${response.status}): ${err}`);
+  // Credentials: ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN, or an `ant auth login` profile.
+  const client = new Anthropic();
+  let message: Anthropic.Beta.BetaMessage;
+  try {
+    // Streaming, because generated test files can be long. "fallbacks: default"
+    // retries on another model if a safety classifier declines the request.
+    message = await client.beta.messages
+      .stream({
+        model: MODEL,
+        max_tokens: 32000,
+        output_config: { effort: "high" },
+        betas: ["server-side-fallback-2026-07-01"],
+        fallbacks: "default",
+        messages: [{ role: "user", content: prompt }],
+      })
+      .finalMessage();
+  } catch (err) {
+    const credentialsHint = "Add ANTHROPIC_API_KEY=sk-ant-... to .env.local, or run `ant auth login`.";
+    if (err instanceof Anthropic.AuthenticationError) {
+      console.error(`\nError: the Anthropic credentials were rejected.\n${credentialsHint}\n`);
+    } else if (err instanceof Anthropic.APIConnectionError) {
+      console.error("Could not reach the Claude API:", err.message);
+    } else if (err instanceof Anthropic.APIError) {
+      console.error(`Claude API error (${err.status}): ${err.message}`);
+    } else if (err instanceof Anthropic.AnthropicError) {
+      // Raised before any request, e.g. when no credentials are configured.
+      console.error(`\nError: ${err.message}\n${credentialsHint}\n`);
+    } else {
+      console.error("Unexpected error calling Claude:", err);
+    }
     process.exit(1);
   }
 
-  const data = (await response.json()) as {
-    content: Array<{ type: string; text: string }>;
-  };
+  if (message.stop_reason === "refusal") {
+    console.error(`Claude declined to generate ${taskLabel}. Adjust the spec and try again.`);
+    process.exit(1);
+  }
+  if (message.stop_reason === "max_tokens") {
+    console.warn(`  ⚠ ${taskLabel} hit the output limit and may be cut off — split the spec or generate one output at a time.`);
+  }
 
-  return data.content
-    .filter((block) => block.type === "text")
+  return message.content
+    .filter((block): block is Anthropic.Beta.BetaTextBlock => block.type === "text")
     .map((block) => block.text)
     .join("\n");
 }
@@ -276,6 +300,7 @@ async function main() {
   for (const task of tasks) {
     console.log(`▶ Generating ${task.label}...`);
     const output = await callClaude(task.prompt, task.label);
+    if (dryRun) continue; // nothing generated, so don't overwrite earlier output
     // Strip markdown code fences if Claude wrapped the output
     const clean = output
       .replace(/^```(?:typescript|ts|javascript|js)?\n?/m, "")
@@ -286,6 +311,11 @@ async function main() {
     results.push({ type: task.label, path: outPath });
     console.log(`  ✔ Written → ${path.relative(process.cwd(), outPath)}`);
     console.log("");
+  }
+
+  if (dryRun) {
+    console.log("\nDry run: no API calls made and no files written.");
+    return;
   }
 
   console.log(`╔═══════════════════════════════════════════════════╗`);

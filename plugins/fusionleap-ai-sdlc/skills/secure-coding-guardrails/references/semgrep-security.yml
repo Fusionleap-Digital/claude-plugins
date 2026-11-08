@@ -7,7 +7,7 @@ rules:
       - pattern: const $VAR = "..."
       - metavariable-regex:
           metavariable: $VAR
-          regex: (?i)(api_?key|secret|token|password|auth|credential|private_?key)
+          regex: (?i)(api_?key|secret|token|password|auth_?token|credential|private_?key)
     message: >
       Possible hardcoded secret in `$VAR`. Move to environment variables and
       access via `process.env.$VAR`.
@@ -41,39 +41,31 @@ rules:
 
   # ── API Route Auth Checks ────────────────────────────────────────────────────
 
-  - id: api-route-missing-auth-get
+  - id: api-route-missing-auth
+    # Replace isAuthenticated / getAuthToken with this project's auth helpers.
     patterns:
       - pattern: |
-          export async function GET(req: NextRequest) { ... return NextResponse.json(...); }
+          export async function $METHOD(...) { ... }
+      - metavariable-regex:
+          metavariable: $METHOD
+          regex: ^(GET|POST|PUT|PATCH|DELETE)$
       - pattern-not: |
-          export async function GET(req: NextRequest) { ... isAuthenticated(...) ... }
+          export async function $METHOD(...) { ... isAuthenticated(...); ... }
       - pattern-not: |
-          export async function GET(req: NextRequest) { ... getAuthToken(...) ... }
+          export async function $METHOD(...) { ... getAuthToken(...); ... }
+      - pattern-not: |
+          export async function $METHOD(...) { ... if (<... isAuthenticated(...) ...>) $S; ... }
+      - pattern-not: |
+          export async function $METHOD(...) { ... if (<... getAuthToken(...) ...>) $S; ... }
     message: >
-      GET handler does not check authentication. Call isAuthenticated() or
-      getAuthToken() before returning data from protected routes.
+      $METHOD handler does not check authentication. Call the auth helper before
+      returning or changing data, or add this route to the rule's exclude list if
+      it is meant to be public.
     severity: WARNING
     languages: [typescript]
     paths:
       include: ["app/api/"]
       exclude: ["app/api/auth/", "app/api/health/", "app/api/contact/"]
-
-  - id: api-route-missing-auth-post
-    patterns:
-      - pattern: |
-          export async function POST(req: NextRequest) { ... return NextResponse.json(...); }
-      - pattern-not: |
-          export async function POST(req: NextRequest) { ... isAuthenticated(...) ... }
-      - pattern-not: |
-          export async function POST(req: NextRequest) { ... getAuthToken(...) ... }
-    message: >
-      POST handler does not check authentication. Call isAuthenticated() or
-      getAuthToken() before mutating data.
-    severity: WARNING
-    languages: [typescript]
-    paths:
-      include: ["app/api/"]
-      exclude: ["app/api/auth/", "app/api/health/"]
 
   # ── Dangerous Functions ──────────────────────────────────────────────────────
 
@@ -97,8 +89,10 @@ rules:
 
   - id: no-dangerouslysetinnerhtml-variable
     patterns:
-      - pattern: dangerouslySetInnerHTML={{ __html: $VAR }}
-      - pattern-not: dangerouslySetInnerHTML={{ __html: "..." }}
+      - pattern: |
+          <$EL dangerouslySetInnerHTML={{ __html: $VAR }} />
+      - pattern-not: |
+          <$EL dangerouslySetInnerHTML={{ __html: "..." }} />
     message: >
       dangerouslySetInnerHTML with a variable risks XSS. Sanitize with
       DOMPurify before rendering.
@@ -111,7 +105,8 @@ rules:
 
   - id: mongoose-query-user-input
     patterns:
-      - pattern: $MODEL.find({ $FIELD: req.$ANYTHING })
+      - pattern: |
+          $MODEL.find({ $FIELD: req.$ANYTHING })
     message: >
       Passing raw request data into Mongoose queries may allow NoSQL injection.
       Validate and sanitize req.$ANYTHING first.
@@ -124,7 +119,8 @@ rules:
 
   - id: password-in-response
     patterns:
-      - pattern: NextResponse.json({ ..., password: $VAL, ... })
+      - pattern: |
+          NextResponse.json({ ..., password: $VAL, ... })
     message: >
       Password field in JSON response. Never return password hashes to the client.
     severity: ERROR
@@ -134,7 +130,8 @@ rules:
 
   - id: token-in-response-body
     patterns:
-      - pattern: NextResponse.json({ ..., token: $VAL, ... })
+      - pattern: |
+          NextResponse.json({ ..., token: $VAL, ... })
     message: >
       Session token in response body. Use HttpOnly cookies instead of returning
       tokens in JSON responses.

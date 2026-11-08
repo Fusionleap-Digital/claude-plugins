@@ -18,8 +18,8 @@ You are implementing the FusionLeap Digital Secure Coding Guardrails pillar — 
 
 Four checks run automatically on every `git commit`:
 
-1. **lint-staged** — ESLint + Prettier on staged files only (fast, no full-repo scan)
-2. **TypeScript** — `tsc --noEmit` to catch type errors before they reach CI
+1. **lint-staged** — ESLint (if the project has it) + Prettier on staged files only
+2. **TypeScript** — `tsc --noEmit` via the `typecheck` script. Tests stay in CI: running the full suite on every commit makes people skip the hook.
 3. **detect-secrets** — blocks commits that introduce API keys, tokens, or credentials
 4. **Semgrep** — security rules tuned for Next.js / TypeScript / MongoDB: missing auth checks, NoSQL injection, XSS, hardcoded secrets, dangerous functions
 
@@ -35,13 +35,14 @@ Before creating any files, ask the user:
 ## Step 2 — Create directory structure
 
 ```bash
-mkdir -p .husky/_
-mkdir -p .semgrep
+mkdir -p .husky .semgrep
 ```
 
-## Step 3 — Create the Husky runtime shim
+Husky v9 hooks are plain shell scripts. Don't create anything in `.husky/_/`: Husky generates that folder itself.
 
-Create `.husky/_/husky.sh` — see `references/husky-shim.sh`.
+## Step 3 — Preserve existing hooks
+
+If `.husky/pre-commit` already exists, show the user what it runs and merge those commands into the new hook rather than dropping them.
 
 ## Step 4 — Create the pre-commit hook
 
@@ -57,10 +58,7 @@ chmod +x .husky/pre-commit
 Create `.husky/commit-msg` with this content:
 
 ```sh
-#!/usr/bin/env sh
-. "$(dirname "$0")/_/husky.sh"
-
-commit_msg=$(cat "$1")
+commit_msg=$(head -n 1 "$1")
 pattern='^(feat|fix|docs|style|refactor|test|chore|security|perf|ci|build|revert)(\(.+\))?: .{1,100}$'
 
 if ! echo "$commit_msg" | grep -qE "$pattern"; then
@@ -84,7 +82,7 @@ chmod +x .husky/commit-msg
 
 Create `.semgrep/security.yml` — see `references/semgrep-security.yml`.
 
-This file contains 12 rules tuned for Next.js / TypeScript / MongoDB covering:
+This file contains 10 rules tuned for Next.js / TypeScript / MongoDB covering:
 - Hardcoded API keys and MongoDB URIs
 - `NEXT_PUBLIC_` environment variable secret leaks
 - Missing auth checks in API route handlers
@@ -93,42 +91,43 @@ This file contains 12 rules tuned for Next.js / TypeScript / MongoDB covering:
 - `dangerouslySetInnerHTML` XSS risks
 - Password or token fields in JSON responses
 
-## Step 7 — Create detect-secrets config
+Then fit it to the project:
+- The `api-route-missing-auth` rule looks for `isAuthenticated(...)` or `getAuthToken(...)`. Find how this project's routes check auth and replace those names with its helpers. If it isn't a Next.js App Router project, delete the rule.
+- Adjust the `exclude` lists to the project's public routes (health checks, webhooks, auth callbacks).
+- If the project doesn't use MongoDB, delete `hardcoded-mongodb-uri` and `mongoose-query-user-input`.
 
-Create `.detect-secrets.cfg` — see `references/detect-secrets-cfg.json`.
+ERROR rules block the commit; WARNING rules are shown but don't block.
 
-## Step 8 — Create lint-staged config
+## Step 7 — Create lint-staged config
 
-Create `.lintstagedrc.json`:
+Create `.lintstagedrc.json`. If the project has an ESLint config (`eslint.config.*` or `.eslintrc*`), lint code files too:
 
 ```json
 {
-  "*.{ts,tsx}": ["prettier --write"],
-  "*.{js,jsx,mjs,cjs}": ["prettier --write"],
+  "*.{ts,tsx,js,jsx,mjs,cjs}": ["eslint --fix", "prettier --write"],
   "*.{json,css,md,mdx}": ["prettier --write"]
 }
 ```
 
-## Step 9 — Update package.json
+Without an ESLint config, use Prettier only:
 
-Add to `"scripts"`:
+```json
+{
+  "*.{ts,tsx,js,jsx,mjs,cjs,json,css,md,mdx}": ["prettier --write"]
+}
+```
+
+## Step 8 — Update package.json
+
+Merge into `"scripts"` (keep any existing `test` script as it is):
 ```json
 "prepare": "husky",
-"typecheck": "tsc --noEmit",
-"test": "vitest run",
-"test:watch": "vitest"
+"typecheck": "tsc --noEmit"
 ```
 
-Add to `"devDependencies"`:
-```json
-"eslint-plugin-security": "^3",
-"husky": "^9",
-"lint-staged": "^15",
-"prettier": "^3",
-"vitest": "^2"
-```
+The setup script installs `husky`, `lint-staged` and `prettier`.
 
-## Step 10 — Create setup script
+## Step 9 — Create setup script
 
 Create `scripts/setup-guardrails.sh` — see `references/setup-guardrails.sh`.
 
@@ -137,20 +136,12 @@ Tell the user to run it once:
 bash scripts/setup-guardrails.sh
 ```
 
-## Step 11 — Update .gitignore
+`.secrets.baseline` **should** be committed — it is not a secret, it is the allowlist of findings already reviewed. It also stores the detect-secrets settings.
 
-Add to `.gitignore`:
-```
-# Spec generator output — review before committing
-specs/generated/
-```
-
-Note: `.secrets.baseline` **should** be committed — it is not a secret, it is the allowlist baseline.
-
-## Step 12 — Confirm and summarise
+## Step 10 — Confirm and summarise
 
 After creating all files, tell the user:
-- Run `bash scripts/setup-guardrails.sh` once to install npm packages, initialise Husky, and generate the `.secrets.baseline`
+- Run `bash scripts/setup-guardrails.sh` once to install npm packages, activate the Husky hooks, and generate the `.secrets.baseline` (it never overwrites the hooks)
 - Every subsequent `git commit` will run all four checks automatically
 - Semgrep and detect-secrets are skipped gracefully if not installed (the hook degrades without failing)
 - `--metrics=off` is set on every Semgrep call — no code or findings leave the machine

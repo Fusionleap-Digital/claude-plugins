@@ -23,6 +23,8 @@ const spec: FeatureSpec = {
     client-side unauthenticated state handling.
   `.trim(),
 
+  stack: ["Next.js App Router", "TypeScript strict", "MongoDB", "Vitest"],
+
   api: {
     path: "/api/auth/session",
     method: "GET",

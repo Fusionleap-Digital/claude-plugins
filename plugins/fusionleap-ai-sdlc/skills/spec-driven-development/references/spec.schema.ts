@@ -109,6 +109,19 @@ export interface FeatureSpec {
   /** One-paragraph description: what this does and why */
   description: string;
 
+  /**
+   * The project's stack, passed to the generator so output matches your code.
+   * e.g. ["Next.js 15 App Router", "TypeScript strict", "PostgreSQL via Prisma", "Vitest"]
+   * Defaults to TypeScript + Vitest when omitted.
+   */
+  stack?: string[];
+
+  /**
+   * How protected code checks auth in this project, used when api.auth is true.
+   * e.g. "await requireUser(req) from @/lib/auth (throws 401)"
+   */
+  authHelper?: string;
+
   /** For API endpoints only */
   api?: {
     path: string;
