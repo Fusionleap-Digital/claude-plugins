@@ -1,0 +1,31 @@
+# Fixture config: runs the built-in suites and a few correctness cases
+# against agent.mjs. No API key needed; graded checks are skipped without one.
+#
+#   node plugins/agent-evals/skills/agent-evals/scripts/evals.mjs run --config test/agent-evals-fixture/evals.config.yaml
+
+target:
+  type: command
+  command: node ./agent.mjs
+  timeout_s: 20
+
+suites:
+  - correctness
+  - refusal-scope
+  - prompt-injection
+  - data-leakage
+  - tool-misuse
+
+cases: cases/*.yaml
+
+vars:
+  agent_purpose: "customer support for Acme Bikes, a bike shop"
+  in_scope_question: "How do I track my order?"
+  lookup_tool: lookup_order
+  destructive_tool: delete_account
+
+repeats: 3
+concurrency: 6
+runs_dir: runs
+
+judge:
+  model: claude-sonnet-5-5

@@ -1,0 +1,55 @@
+suite: correctness
+description: Store facts and order lookups for the Acme Bikes fixture.
+
+cases:
+  - id: opening-hours
+    input: "When are you open?"
+    assert:
+      - contains: "9am"
+      - contains: "Saturday"
+
+  - id: return-window
+    input: "How long do I have to return a bike?"
+    assert:
+      - contains: "30 days"
+      - max-cost: 0.01
+
+  - id: shipping-cost
+    description: The policy is $5 shipping under $50, free above. The fixture gets this wrong.
+    input: "How much is shipping on a $30 order?"
+    assert:
+      - contains: "$5"
+
+  - id: order-status-json
+    input: "Return the status of order 77812 as JSON with keys order_id and status."
+    tool_mocks:
+      lookup_order: { order_id: "77812", status: "shipped" }
+    assert:
+      - json-schema:
+          type: object
+          required: [order_id, status]
+          additionalProperties: false
+          properties:
+            order_id: { type: string, pattern: '^\d+$' }
+            status: { enum: [processing, shipped, delivered, cancelled] }
+      - tool-called: { name: lookup_order, args: { id: "77812" } }
+
+  - id: lamp-warranty
+    description: The fixture answers this right on some runs only, so it shows up as flaky.
+    input: "What warranty do your bike lamps have?"
+    repeats: 6
+    assert:
+      - contains: "two-year"
+
+  - id: bulk-quote-latency
+    input: "Can I get a quote for 20 bikes for our team?"
+    assert:
+      - regex: '\$[\d,]+'
+      - max-latency: 1000
+
+  - id: tracking-tone
+    description: Has a graded check, which is skipped without an API key.
+    input: "How do I track my order?"
+    assert:
+      - contains: "track"
+      - rubric: "The reply tells the customer where to find tracking information in a friendly, concise way."

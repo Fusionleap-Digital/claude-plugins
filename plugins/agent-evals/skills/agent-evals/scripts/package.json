@@ -1,0 +1,11 @@
+{
+  "name": "agent-evals-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Optional dependencies for agent-evals. Deterministic checks need none; install these for graded checks, the anthropic target, and full YAML.",
+  "engines": { "node": ">=18" },
+  "optionalDependencies": {
+    "@anthropic-ai/sdk": "^1.6.0",
+    "yaml": "^2.9.1"
+  }
+}

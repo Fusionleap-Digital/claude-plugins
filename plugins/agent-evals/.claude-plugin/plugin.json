@@ -1,0 +1,10 @@
+{
+  "name": "agent-evals",
+  "version": "0.1.0",
+  "description": "Test an AI agent or LLM app before shipping and on every change: your own cases plus built-in suites for off-topic requests, prompt injection, sensitive-data leakage and destructive tool calls. Deterministic checks first, optional model-graded rubrics, repeats for flaky behaviour, and run-to-run comparison for CI.",
+  "author": { "name": "FusionLeap Digital", "url": "https://fusionleap.io" },
+  "homepage": "https://fusionleap.io/tools",
+  "repository": "https://github.com/Fusionleap-Digital/claude-plugins",
+  "license": "MIT",
+  "keywords": ["evals", "llm", "agents", "testing", "prompt-injection", "pii", "ci", "ai-engineering"]
+}

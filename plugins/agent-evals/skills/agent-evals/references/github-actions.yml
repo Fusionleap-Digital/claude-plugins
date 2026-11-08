@@ -1,0 +1,77 @@
+# Sample GitHub Actions workflow: run the evals on every pull request and
+# fail it when a pass rate drops more than 10 points against the baseline.
+# Copy to .github/workflows/agent-evals.yml and adjust the marked lines.
+#
+# The baseline is a report.json committed to your repo. Make one from a run
+# you trust:
+#   node <plugin>/skills/agent-evals/scripts/evals.mjs run --label baseline
+#   cp evals/runs/<that run>/report.json evals/baseline/report.json
+# Update it only on purpose, in its own commit, after reviewing the run.
+
+name: agent-evals
+
+on:
+  pull_request:
+    paths: ['src/**', 'prompts/**', 'evals/**']    # adjust: whatever changes the agent
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # The plugin scripts, pinned to a commit you have reviewed.
+      - name: Get agent-evals
+        run: |
+          git clone --filter=blob:none --no-checkout https://github.com/Fusionleap-Digital/claude-plugins.git .agent-evals
+          git -C .agent-evals sparse-checkout set plugins/agent-evals
+          git -C .agent-evals checkout "$AGENT_EVALS_REF"
+          npm install --prefix .agent-evals/plugins/agent-evals/skills/agent-evals/scripts --no-audit --no-fund
+        env:
+          AGENT_EVALS_REF: main    # adjust: pin a commit SHA
+
+      # Start or build your agent here if the target needs it, for example:
+      # - run: npm ci && npm run build
+      # - run: npm start & npx wait-on http://localhost:3000/health
+
+      - name: Run evals
+        id: run
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}   # for graded checks; optional
+        run: |
+          set +e
+          node .agent-evals/plugins/agent-evals/skills/agent-evals/scripts/evals.mjs run \
+            --config evals/evals.config.yaml --label "pr-${{ github.event.pull_request.number || 'manual' }}" --out evals/runs/ci
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Compare with baseline
+        run: |
+          node .agent-evals/plugins/agent-evals/skills/agent-evals/scripts/evals.mjs compare \
+            evals/baseline/report.json evals/runs/ci --threshold 0.1
+
+      - name: Summary
+        if: always()
+        run: |
+          cat evals/runs/ci/compare.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          head -n 20 evals/runs/ci/report.md >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-evals
+          path: evals/runs/ci/
+
+      # The compare step gates the PR on regressions. To also fail on any case
+      # below its pass threshold (not only on drops), uncomment:
+      # - if: steps.run.outputs.exit != '0'
+      #   run: exit 1

@@ -1,0 +1,49 @@
+# Correctness: your own cases, from what your agent is for.
+# Replace these examples. Write cases from real questions your users ask,
+# and keep the expected results honest: if a case fails, fix the agent, or
+# fix the case only if the expectation itself was wrong.
+#
+# Format: references/format.md in the agent-evals plugin.
+
+suite: correctness
+description: The agent answers the questions it exists to answer.
+defaults:
+  repeats: 3
+
+cases:
+  - id: return-window
+    description: Straight fact from the policy document.
+    input: "How long do I have to return something?"
+    context:
+      - title: Returns policy
+        content: "Unused items can be returned within 30 days of delivery."
+    assert:
+      - contains: "30 days"
+      - max-latency: 5000
+
+  - id: order-status-json
+    description: The API client parses this reply, so it must be valid JSON.
+    input: "Return the status of order 77812 as JSON with keys order_id and status."
+    tool_mocks:
+      lookup_order: { order_id: "77812", status: "shipped" }
+    assert:
+      - json-schema:
+          type: object
+          required: [order_id, status]
+          properties:
+            order_id: { type: string }
+            status: { enum: [processing, shipped, delivered, cancelled] }
+      - tool-called: { name: lookup_order, args: { id: "77812" } }
+
+  - id: multi-turn-follow-up
+    description: The second question only makes sense with the first.
+    messages:
+      - role: user
+        content: "Do you ship to Canada?"
+      - role: assistant
+        content: "Yes, we ship to Canada. Delivery takes 5 to 8 business days."
+      - role: user
+        content: "And how much does that cost?"
+    assert:
+      - regex: '\$\s?\d+'
+      - rubric: "The reply gives a shipping cost for Canada specifically, not a generic answer."
