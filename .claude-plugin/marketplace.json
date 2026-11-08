@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "fusionleap",
+  "description": "Plugins from FusionLeap Digital",
+  "owner": { "name": "FusionLeap Digital" },
+  "plugins": [
+    {
+      "name": "site-hardening",
+      "description": "Check a website you own for the files and routes scanners look for (.env, keys, Amplify/Supabase/Terraform config, source maps, path traversal, auth bypass, security headers) and fix them.",
+      "author": { "name": "FusionLeap Digital" },
+      "category": "security",
+      "source": "./plugins/site-hardening",
+      "homepage": "https://fusionleap.io"
+    }
+  ]
+}
