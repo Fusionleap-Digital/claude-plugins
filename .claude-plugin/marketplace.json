@@ -25,6 +25,46 @@
       "category": "development",
       "source": "./plugins/fusionleap-ai-sdlc",
       "homepage": "https://fusionleap.io/tools"
+    },
+    {
+      "name": "site-ops",
+      "description": "Day-to-day operations for a small production website (Next.js on AWS Amplify, Vercel or Netlify): email DNS (SPF, DKIM, DMARC, MX), pre- and post-deploy checks, fake crawler detection from access logs, AI visibility (robots, llms.txt, Organization schema), a test lead through your own form, and a weekly ops digest.",
+      "author": {
+        "name": "FusionLeap Digital"
+      },
+      "category": "operations",
+      "source": "./plugins/site-ops",
+      "homepage": "https://fusionleap.io/tools"
+    },
+    {
+      "name": "security-review-packet",
+      "description": "Draft the packet security and compliance need before they sign off on an AI system: inventory of models, vendors, data stores, routes, agent tools, MCP servers, IaC and dependencies from the repo, then a cited system overview, data flow, data classification, threat review and open questions, with an optional SOC 2 / NIST AI RMF / ISO 42001 / OWASP LLM coverage map.",
+      "author": {
+        "name": "FusionLeap Digital"
+      },
+      "category": "security",
+      "source": "./plugins/security-review-packet",
+      "homepage": "https://fusionleap.io/tools"
+    },
+    {
+      "name": "ai-necessity-gate",
+      "description": "Run a proposed AI use case through the AI Necessity Gate before money is spent: would rules, search or a report do it instead, is the value measurable, and can the data be trusted. Profiles a data sample or schema without printing values, maps risk and sign-off, and writes a one-page verdict (Go, Go after fixing data, Not AI, Not yet) with scores.",
+      "author": {
+        "name": "FusionLeap Digital"
+      },
+      "category": "productivity",
+      "source": "./plugins/ai-necessity-gate",
+      "homepage": "https://fusionleap.io/tools"
+    },
+    {
+      "name": "agent-evals",
+      "description": "Test an AI agent or LLM app before shipping and on every change: your own cases plus built-in suites for off-topic requests, prompt injection, sensitive-data leakage and destructive tool calls. Deterministic checks first, optional model-graded rubrics, repeats for flaky behaviour, and run-to-run comparison for CI.",
+      "author": {
+        "name": "FusionLeap Digital"
+      },
+      "category": "testing",
+      "source": "./plugins/agent-evals",
+      "homepage": "https://fusionleap.io/tools"
     }
   ]
 }

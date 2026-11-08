@@ -10,6 +10,10 @@ Free, MIT-licensed plugins from [FusionLeap Digital](https://fusionleap.io/tools
 |---|---|---|
 | [site-hardening](#site-hardening) | Checks a website you own for exposed secret and config files, builds a verified Content-Security-Policy, repo and hosting checklists | `/plugin install site-hardening@fusionleap` |
 | [fusionleap-ai-sdlc](plugins/fusionleap-ai-sdlc/README.md) | Pre-commit security checks (lint, types, detect-secrets, Semgrep) and spec-driven development with Claude-drafted tests | `/plugin install fusionleap-ai-sdlc@fusionleap` |
+| [site-ops](plugins/site-ops/README.md) | Day-to-day checks for a small production site: email DNS, pre- and post-deploy checks, fake crawler detection, AI visibility, a test lead through your form, and a weekly digest | `/plugin install site-ops@fusionleap` |
+| [security-review-packet](plugins/security-review-packet/README.md) | Inventories an AI system's repo and drafts the packet security and compliance need before they sign off, with a citation behind every claim | `/plugin install security-review-packet@fusionleap` |
+| [ai-necessity-gate](plugins/ai-necessity-gate/README.md) | Runs a proposed AI use case through the AI Necessity Gate and writes a one-page verdict: Go, Go after fixing data, Not AI, or Not yet | `/plugin install ai-necessity-gate@fusionleap` |
+| [agent-evals](plugins/agent-evals/README.md) | Tests an AI agent or LLM app on every change: your own cases plus suites for prompt injection, data leakage and destructive tool calls, with run-to-run comparison for CI | `/plugin install agent-evals@fusionleap` |
 
 ## site-hardening
 
