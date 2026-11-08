@@ -1,0 +1,14 @@
+date,time,x-edge-location,sc-bytes,c-ip,cs-method,cs\(Host),cs-uri-stem,sc-status,cs\(Referer),cs\(User-Agent),cs-uri-query
+2026-10-14,01:00:00,SFO53-P1,1200,66.249.66.1,GET,d1.cloudfront.net,/,200,-,Mozilla/5.0%20\(compatible;%20Googlebot/2.1;%20+http://www.google.com/bot.html),-
+2026-10-14,01:00:05,SFO53-P1,1200,66.249.66.1,GET,d1.cloudfront.net,/about,200,-,Mozilla/5.0%20\(compatible;%20Googlebot/2.1;%20+http://www.google.com/bot.html),-
+2026-10-14,01:01:00,SFO53-P1,300,203.0.113.5,GET,d1.cloudfront.net,/.env,404,-,Mozilla/5.0%20\(compatible;%20Googlebot/2.1;%20+http://www.google.com/bot.html),-
+2026-10-14,01:02:00,SFO53-P1,1200,20.171.207.10,GET,d1.cloudfront.net,/llms.txt,200,-,Mozilla/5.0%20AppleWebKit/537.36%20\(KHTML%20like%20Gecko;%20compatible;%20GPTBot/1.2;%20+https://openai.com/gptbot),-
+2026-10-14,01:03:00,SFO53-P1,300,198.51.100.7,GET,d1.cloudfront.net,/.env,404,-,Mozilla/5.0%20AppleWebKit/537.36%20\(KHTML%20like%20Gecko;%20compatible;%20GPTBot/1.2;%20+https://openai.com/gptbot),-
+2026-10-14,01:03:01,SFO53-P1,300,198.51.100.7,GET,d1.cloudfront.net,/.env.production,404,-,Mozilla/5.0%20\(compatible;%20ClaudeBot/1.0;%20+claudebot@anthropic.com),-
+2026-10-14,01:03:02,SFO53-P1,300,198.51.100.7,GET,d1.cloudfront.net,/amplify/team-provider-info.json,404,-,Mozilla/5.0%20\(compatible;%20PerplexityBot/1.0;%20+https://perplexity.ai/perplexitybot),-
+2026-10-14,01:03:03,SFO53-P1,900,198.51.100.7,GET,d1.cloudfront.net,/.git/config,200,-,CCBot/2.0%20\(https://commoncrawl.org/faq/),-
+2026-10-14,01:04:00,SFO53-P1,1200,52.70.0.1,GET,d1.cloudfront.net,/services,200,-,Mozilla/5.0%20\(compatible;%20Amazonbot/0.1;%20+https://developer.amazon.com/support/amazonbot),-
+2026-10-14,01:05:00,SFO53-P1,300,192.0.2.9,GET,d1.cloudfront.net,/terraform.tfstate,404,-,Mozilla/5.0%20\(compatible;%20Amazonbot/0.1;%20+https://developer.amazon.com/support/amazonbot),-
+2026-10-14,01:06:00,SFO53-P1,1200,192.0.2.50,GET,d1.cloudfront.net,/robots.txt,200,-,Mozilla/5.0%20\(compatible;%20Bytespider;%20spider-feedback@bytedance.com),-
+2026-10-14,01:07:00,SFO53-P1,1200,192.0.2.77,GET,d1.cloudfront.net,/,200,-,Mozilla/5.0%20\(Macintosh;%20Intel%20Mac%20OS%20X%2010_15_7)%20AppleWebKit/537.36,-
+2026-10-14,01:08:00,SFO53-P1,300,192.0.2.88,GET,d1.cloudfront.net,/wp-login.php,404,-,Mozilla/5.0%20\(Windows%20NT%2010.0;%20Win64;%20x64),-

@@ -1,0 +1,10 @@
+{
+  "name": "site-ops",
+  "version": "0.1.0",
+  "description": "Day-to-day operations for a small production website (Next.js on AWS Amplify, Vercel or Netlify): email DNS (SPF, DKIM, DMARC, MX), pre- and post-deploy checks, fake crawler detection from access logs, AI visibility (robots, llms.txt, Organization schema), a test lead through your own form, and a weekly ops digest.",
+  "author": { "name": "FusionLeap Digital" },
+  "homepage": "https://fusionleap.io",
+  "repository": "https://github.com/Fusionleap-Digital/claude-plugins",
+  "license": "MIT",
+  "keywords": ["operations", "deploy", "email", "dmarc", "spf", "dkim", "crawlers", "bots", "llms-txt", "schema", "nextjs", "amplify", "vercel", "netlify", "monitoring"]
+}
