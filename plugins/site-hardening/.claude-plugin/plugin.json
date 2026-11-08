@@ -1,7 +1,7 @@
 {
   "name": "site-hardening",
-  "version": "0.1.0",
-  "description": "Check a website you own for the files and routes scanners look for (.env, keys, Amplify/Supabase/Terraform config, source maps, path traversal, auth bypass, security headers) and fix them.",
+  "version": "0.2.0",
+  "description": "Check a website you own for the files and routes scanners look for (.env, keys, Amplify/Supabase/Terraform config, source maps, path traversal, auth bypass, security headers), build a verified Content-Security-Policy from what the site loads, and fix the rest.",
   "author": { "name": "FusionLeap Digital" },
   "homepage": "https://fusionleap.io",
   "license": "MIT",

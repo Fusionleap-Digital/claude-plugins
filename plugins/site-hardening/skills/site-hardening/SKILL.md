@@ -69,6 +69,41 @@ It writes `report.md` and `report.json`. What it checks:
 A 5xx on a traversal probe is a warning: the route crashed on bad input,
 which is worth reading even when nothing leaked.
 
+## Build a Content-Security-Policy
+
+When the probe reports `header-csp`, or the user asks for a CSP, build one
+from what the site actually loads instead of writing it by hand:
+
+```bash
+node "${CLAUDE_PLUGIN_ROOT}/skills/site-hardening/scripts/csp.mjs" https://example.com --pages 12
+```
+
+It opens the site in headless Chrome (installed Chrome, Chromium, Edge or
+Brave; or `CHROME_PATH`; Node 22+), visits up to `--pages` same-origin pages
+(add more with `--path /pricing`), scrolls each one and waits for late
+scripts. It records every origin used per directive, plus inline scripts,
+inline event handlers and style attributes. Then it reloads every page with
+the proposed policy applied as report-only, adds anything still blocked
+(dynamic inline code, `eval`), and checks again, up to three rounds.
+
+- Writes `csp.md` (policy, where each source came from, notes, config for
+  Next.js, Amplify, Vercel and Netlify) and `csp.json`. Exit code 1 means
+  violations remain.
+- `--verify "<policy>"` checks an existing or hand-written policy without
+  building one; use it on the current production header.
+- Best run against a production build served locally (`next build && next
+  start`) before deploying. On a live site, each page load counts as a visit
+  in the site's analytics.
+- Fixed inline scripts get hashes. Next.js page data scripts differ per page,
+  so Next.js sites need `'unsafe-inline'` for scripts unless the user adds
+  nonces in middleware; explain that tradeoff rather than adding nonces
+  unasked.
+- It can't see pages behind sign-in or things that load only after a click
+  (chat widgets, video players, checkout). Open those by hand with the
+  policy in report-only mode, or pass them with `--path` if they're public.
+- Ship the policy as `Content-Security-Policy-Report-Only` first if the site
+  has flows the crawl couldn't reach, then switch to enforcing.
+
 ## 2. Repo audit
 
 Work through `references/repo-checklist.md` in the site's repo. It has the

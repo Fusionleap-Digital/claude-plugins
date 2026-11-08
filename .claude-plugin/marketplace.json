@@ -6,7 +6,7 @@
   "plugins": [
     {
       "name": "site-hardening",
-      "description": "Check a website you own for the files and routes scanners look for (.env, keys, Amplify/Supabase/Terraform config, source maps, path traversal, auth bypass, security headers) and fix them.",
+      "description": "Check a website you own for the files and routes scanners look for (.env, keys, Amplify/Supabase/Terraform config, source maps, path traversal, auth bypass, security headers), build a verified Content-Security-Policy from what the site loads, and fix the rest.",
       "author": { "name": "FusionLeap Digital" },
       "category": "security",
       "source": "./plugins/site-hardening",
