@@ -1,0 +1,9 @@
+{
+  "name": "ai-necessity-gate",
+  "version": "1.0.0",
+  "description": "Run a proposed AI use case through the AI Necessity Gate before money is spent: would rules, search or a report do it instead, is the value measurable, and can the data be trusted. Profiles a data sample or schema without printing values, maps risk and sign-off, and writes a one-page verdict (Go, Go after fixing data, Not AI, Not yet) with scores.",
+  "author": { "name": "FusionLeap Digital" },
+  "homepage": "https://fusionleap.io/tools",
+  "license": "MIT",
+  "keywords": ["ai", "use-case", "go-no-go", "data-readiness", "pii", "governance", "business-case"]
+}

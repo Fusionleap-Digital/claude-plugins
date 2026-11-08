@@ -1,0 +1,5 @@
+table,field_name,data_type,description,owner,classification
+policy,policy_number,varchar,Health plan policy identifier,Ops,
+policy,holder_email,varchar,Policyholder e-mail address,Ops,PII
+policy,premium,numeric,Monthly premium in USD,Finance,
+claim,claim_notes,text,Free text from adjusters,,

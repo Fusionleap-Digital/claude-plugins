@@ -1,0 +1,164 @@
+{
+  "use_case": {
+    "name": "Answer order and stock questions",
+    "organization": "Calder Industrial Supply (fictional)",
+    "date": "2026-11-08",
+    "prepared_by": "Luis Ferrante, Director of IT",
+    "prepared_for": "the CEO",
+    "summary": "A generative AI chatbot on the website and phone line to answer customer service contacts. Gated here: the 83% of calls that are \"where is my order\" (71%) and \"is part X in stock at branch Y\" (12%). Returns, pricing disputes and technical questions are a separate use case."
+  },
+  "intake": {
+    "problem": "Customer service is swamped; hold times average 7 minutes and customers complain.",
+    "who": "22 customer service agents; about 9,000 business customers.",
+    "today": "Agents look up order status in the ERP and tracking on the carrier site. Shipment notification emails were turned off years ago after a bad template went out.",
+    "volume": "About 600 calls and 250 emails a day. A 500-call sample: 71% order status, 12% stock checks.",
+    "cost": "7-minute average hold time. No cost per contact worked out.",
+    "wrong_answer": "A wrong ship date idles the customer's maintenance crew and can cost the account.",
+    "data": "ERP (orders, inventory, customers) with a readable reporting database; carrier tracking via the shipping system. Buyer names, phones and emails.",
+    "value": "CEO goal: save 30% of agent time. No value put on the saved time; no layoffs planned.",
+    "sign_off": "Ana Ruiz (VP Customer Service, owner), the CEO, IT security, general counsel."
+  },
+  "simplicity": {
+    "input": {
+      "score": 0,
+      "evidence": "The customer gives a PO or order number, or a part number and a branch."
+    },
+    "rules": {
+      "score": 0,
+      "evidence": "Agents follow one rule: look the number up in the ERP and the carrier site."
+    },
+    "output": {
+      "score": 0,
+      "evidence": "A lookup: order status, ship date, tracking link, stock on hand."
+    },
+    "alternative": {
+      "score": 0,
+      "evidence": "Shipment emails, an order-status page and an IVR lookup by order number would answer most of the 83%, from the same ERP data, with exact answers."
+    }
+  },
+  "alternative": {
+    "best": "integration",
+    "description": "Turn shipment emails back on (order confirmed, shipped with tracking link, delayed with new date) from a reviewed template. Add order lookup by PO or order number to the customer portal and the phone menu. Then a branch stock lookup for signed-in customers, the same way. All of it reads the ERP and carrier data agents already use."
+  },
+  "clarity": {
+    "value": {
+      "score": 2,
+      "evidence": "The stated goal is agent hours, which scores 0 alone. But average hold time, 7 minutes today, is a wait customers feel and complain about."
+    },
+    "volume": {
+      "score": 1,
+      "evidence": "About 600 calls and 250 emails a day; categories from a counted 500-call sample; no cost per contact."
+    },
+    "owner": {
+      "score": 2,
+      "evidence": "Ana Ruiz would own it; the CEO asked for it."
+    },
+    "wrong_answer": {
+      "score": 1,
+      "evidence": "Cost is clear (idle crews, lost accounts), but no review step or fallback is defined for a chatbot answer."
+    }
+  },
+  "data": {
+    "profiled": false,
+    "availability": {
+      "score": 2,
+      "evidence": "Order status, ship dates, tracking and stock are all in the ERP, the source of truth."
+    },
+    "quality": {
+      "score": 0,
+      "evidence": "Not known. Nobody has checked how often ERP promise dates match actual delivery."
+    },
+    "access": {
+      "score": 2,
+      "evidence": "ERP team owns it; a reporting database is already readable."
+    },
+    "sensitivity": {
+      "score": 1,
+      "evidence": "Buyer names, phones and emails are listed as the personal data involved; no masking or access plan described."
+    }
+  },
+  "risk": {
+    "flags": {
+      "decisions_about_people": false,
+      "regulated_data": false,
+      "unreviewed_external_output": true,
+      "personal_data": true,
+      "money_movement": false
+    },
+    "regulations": [
+      "State consumer privacy laws for buyer contact data",
+      "CAN-SPAM for shipment emails"
+    ],
+    "sign_off": [
+      {
+        "who": "IT security",
+        "needs": "Which ERP fields the portal, phone menu and emails expose, how customers are authenticated before seeing an order, and logging."
+      },
+      {
+        "who": "General counsel",
+        "needs": "The shipment email templates and the wording of delay notices."
+      },
+      {
+        "who": "Ana Ruiz, customer service",
+        "needs": "The call categories that move to self-service and how agents point callers to it."
+      },
+      {
+        "who": "ERP team",
+        "needs": "Read access for the portal and phone menu, and the refresh timing of ship dates."
+      }
+    ]
+  },
+  "reasons": [
+    "83% of contacts ask for a fact that already sits in the ERP, keyed by an order or part number. That is a lookup, not a judgment, and it scores 0 of 8 on the Simplicity Test.",
+    "A chatbot would add model cost and the risk of a confidently wrong ship date to a question that has one exact answer.",
+    "Proactive shipment emails stop many of these calls before they happen, which no chatbot can do.",
+    "\"Save 30% of agent time\" is not yet a value. Hold time, 7 minutes today, and the accounts at risk from late or wrong answers are the numbers to track.",
+    "Returns, pricing disputes and technical questions (17% of calls) may need judgment. Gate them separately once these calls are gone."
+  ],
+  "top_risks": [
+    {
+      "risk": "ERP promise dates are wrong often enough that proactive emails spread bad dates faster.",
+      "mitigation": "Compare promise dates with carrier delivery for one month before turning on delay emails."
+    },
+    {
+      "risk": "A template mistake repeats what got emails turned off years ago.",
+      "mitigation": "Review templates with customer service and counsel, send to 5% of customers first, and watch replies and unsubscribes."
+    },
+    {
+      "risk": "Customers keep calling out of habit, so call volume barely moves.",
+      "mitigation": "Put the order link in every confirmation, offer the lookup first in the phone menu, and have agents send the link on each call."
+    }
+  ],
+  "first_build": {
+    "scope": "Shipment emails (confirmed, shipped with tracking, delayed) from a reviewed template, plus order lookup by PO or order number in the customer portal and the phone menu. About six weeks with the ERP team.",
+    "left_out": "Any chatbot; the branch stock lookup (next, same pattern); returns, pricing disputes and technical questions, which get their own gate."
+  },
+  "measure": {
+    "metric": "\"Where is my order\" calls per day",
+    "baseline": "about 425 (71% of 600)",
+    "target": "under 200, with average hold time under 3 minutes",
+    "check_by": "2027-03-31"
+  },
+  "data_fixes": [],
+  "unblock": [],
+  "result": {
+    "rubric_version": "1.0.0",
+    "verdict": "not_ai",
+    "verdict_label": "Not AI",
+    "rule": 1,
+    "scores": {
+      "simplicity": 0,
+      "clarity": 6,
+      "data": 5
+    },
+    "max_per_test": 8,
+    "tests": {
+      "simplicity": "pipeline_will_do",
+      "clarity": "pass",
+      "data": "fixable"
+    },
+    "data_verified": false,
+    "risk_level": "high",
+    "human_review": "A person reviews every output in the first build."
+  }
+}
